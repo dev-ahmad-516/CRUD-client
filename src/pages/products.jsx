@@ -2,6 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
+import { FaTrash } from "react-icons/fa6";
+import { FaEdit } from "react-icons/fa";
+import "./products.css";
+import toast from "react-hot-toast";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -24,6 +28,25 @@ function Products() {
     // we can use useEffect to call the function only once when the component is mounted
     fetchProducts();
   }, []);
+
+  async function deleteProduct(id) {
+    const Product = await axios.delete(`http://localhost:8000/${id}`);
+    const singleProduct = products.filter((p) => p._id !== id);
+    setProducts(singleProduct);
+    toast.error("Deleted Permanently!");
+    // toast.custom((t) => (
+    //   <div
+    //     style={{
+    //       padding: "10px 20px",
+    //       background: "#ff4d4f",
+    //       color: "white",
+    //       borderRadius: "5px",
+    //     }}
+    //   >
+    //     Product removed permanently!
+    //   </div>
+    // ));
+  }
   return (
     <div className="w-75 mx-auto my-4 ">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -52,7 +75,7 @@ function Products() {
         })}
       </div> */}
 
-      <div className="row g-4 mt-4">
+      <div className="row g-4 mt-4 complete">
         {products
           .filter((p) => p.title)
           .map((meriProduct) => (
@@ -61,7 +84,7 @@ function Products() {
               style={{ flexWrap: "wrap" }}
               key={meriProduct._id || meriProduct.id}
             >
-              <Card className="h-100">
+              <Card className="h-100 card-style">
                 <Card.Img
                   variant="top"
                   src={
@@ -73,8 +96,17 @@ function Products() {
                   <Card.Text>{meriProduct.desc}</Card.Text>
                   <Card.Text>Price: ${meriProduct.price}</Card.Text>
                   <Card.Text>Rating: {meriProduct.rating}</Card.Text>
-                  <Card.Text>Reviews: {meriProduct.reviews}</Card.Text>
-                  <Button variant="primary">Details</Button>
+                  <Card.Text>Reviews: {meriProduct.review}</Card.Text>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <Button variant="primary">Details</Button>
+                    <div className="d-flex gap-3">
+                      <FaTrash onClick={() => deleteProduct(meriProduct._id)} />
+                      {/* <FaEdit onClick={() => navigate("/edit/:id  ")} /> */}
+                      <FaEdit
+                        onClick={() => navigate(`/edit/${meriProduct._id}`)}
+                      />
+                    </div>
+                  </div>
                 </Card.Body>
               </Card>
             </div>

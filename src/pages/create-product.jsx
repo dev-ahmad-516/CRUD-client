@@ -3,6 +3,7 @@ import { Button, Form } from "react-bootstrap";
 import Products from "./products";
 import axios from "axios";
 import { Navigate, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 // function CreateProduct() {
 //   const [products, setProducts] = useState({
@@ -104,11 +105,24 @@ function CreateProduct() {
 
   async function submitHandler(e) {
     e.preventDefault();
-    console.log(products); // now you will see data
-    const res = await axios.post("http://localhost:8000/", products);
-    console.log(res.data);
-    navigate("/");
+
+    const { title, desc, price, rating, review } = products;
+    if (!title) return toast.error("Title is required!");
+    if (!desc) return toast.error("Description is required!");
+    if (!price) return toast.error("Price is required!");
+    if (!rating) return toast.error("Rating is required!");
+    if (!review) return toast.error("Review is required!");
+    try {
+      await axios.post("http://localhost:8000/", products);
+      toast.success("Product created successfully!");
+      navigate("/");
+    } catch (error) {
+      toast.error("Failed to create product!");
+      console.error(error);
+    }
   }
+
+ 
 
   return (
     <div className="w-50 mx-auto mt-4 my-4">
