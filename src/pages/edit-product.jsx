@@ -10,7 +10,10 @@ function EditProduct() {
   const params = useParams();
   console.log(params.id);
   async function fetchProduct() {
-    const product = await axios.get(`http://localhost:8000/${params.id}`);
+    // const product = await axios.get(`http://localhost:8000/${params.id}`);
+    const product = await axios.get(
+      `https://crud-server-lkya.onrender.com/${params.id}`
+    );
     console.log(product.data);
     setProductData(product.data);
   }
@@ -33,7 +36,8 @@ function EditProduct() {
     if (!rating) return toast.error("Rating is required!");
     if (!review) return toast.error("Review is required!");
     try {
-      await axios.patch(`http://localhost:8000/${params.id}`, productData);
+      // await axios.patch(`http://localhost:8000/${params.id}`, productData);
+      await axios.patch(`https://crud-server-lkya.onrender.com/${params.id}`, productData);
       toast.success("Product Updated successfully!");
       navigate("/");
     } catch (error) {

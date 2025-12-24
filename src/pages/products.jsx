@@ -18,7 +18,7 @@ function Products() {
     // const data = await res.json();
     // console.log("data", data);
 
-    const res = await axios.get("http://localhost:8000");
+    const res = await axios.get("https://crud-server-lkya.onrender.com/");
     console.log(res);
     setProducts(res.data);
   }
@@ -30,7 +30,9 @@ function Products() {
   }, []);
 
   async function deleteProduct(id) {
-    const Product = await axios.delete(`http://localhost:8000/${id}`);
+    const Product = await axios.delete(
+      `https://crud-server-lkya.onrender.com/${id}`
+    );
     const singleProduct = products.filter((p) => p._id !== id);
     setProducts(singleProduct);
     toast.error("Deleted Permanently!");

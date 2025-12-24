@@ -113,7 +113,8 @@ function CreateProduct() {
     if (!rating) return toast.error("Rating is required!");
     if (!review) return toast.error("Review is required!");
     try {
-      await axios.post("http://localhost:8000/", products);
+      // await axios.post("http://localhost:8000/", products);
+      await axios.post("https://crud-server-lkya.onrender.com/", products);
       toast.success("Product created successfully!");
       navigate("/");
     } catch (error) {
@@ -121,8 +122,6 @@ function CreateProduct() {
       console.error(error);
     }
   }
-
- 
 
   return (
     <div className="w-50 mx-auto mt-4 my-4">
