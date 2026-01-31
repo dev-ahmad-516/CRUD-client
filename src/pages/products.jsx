@@ -12,7 +12,9 @@ function Products() {
 
   async function fetchProducts() {
     try {
-      const res = await axios.get("http://localhost:8000/products");
+      const res = await axios.get(
+        "https://crud-server-yqbp.onrender.com/products",
+      );
       if (Array.isArray(res.data)) {
         setProducts(res.data);
       } else {
@@ -30,7 +32,9 @@ function Products() {
 
   async function deleteProduct(id) {
     try {
-      await axios.delete(`http://localhost:8000/products/${id}`);
+      await axios.delete(
+        `https://crud-server-yqbp.onrender.com/products/${id}`,
+      );
 
       const remainingProducts = products.filter(
         (p) => p.id !== id && p._id !== id,
@@ -54,15 +58,13 @@ function Products() {
 
       <div className="row g-4 mt-4 complete">
         {products
-          .filter((p) => p.title)
+          .filter((p) => p.title) // Only show items with a title
           .map((meriProduct) => {
-            const searchTerm = encodeURIComponent(meriProduct.title);
-            const dynamicFallback = `https://loremflickr.com/400/300/${searchTerm}`;
-
+            // LOGIC: Use the image from database.
+            // If it's missing or an empty string, the 'onError' below will catch it.
             const displayImage =
-              meriProduct.image && meriProduct.image.startsWith("http")
-                ? meriProduct.image
-                : dynamicFallback;
+              meriProduct.image ||
+              "https://placehold.co/600x400?text=No+Image+Found";
 
             return (
               <div
@@ -70,6 +72,7 @@ function Products() {
                 key={meriProduct.id || meriProduct._id}
               >
                 <Card className="h-100 card-style shadow-sm">
+                  {/* Direct Image Display */}
                   <div style={{ height: "200px", overflow: "hidden" }}>
                     <Card.Img
                       variant="top"
@@ -77,11 +80,12 @@ function Products() {
                       style={{
                         height: "100%",
                         width: "100%",
-                        objectFit: "cover",
+                        objectFit: "cover", // Keeps Admin's images looking sharp without stretching
                       }}
                       onError={(e) => {
+                        // Fallback if the Admin's link is broken or 404
                         e.target.src =
-                          "https://placehold.co/600x400?text=No+Image+Found";
+                          "https://placehold.co/600x400?text=Invalid+Link";
                       }}
                     />
                   </div>

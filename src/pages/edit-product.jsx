@@ -1,128 +1,123 @@
+import React, { useState, useEffect } from "react";
+import { Button, Form, Card, Spinner } from "react-bootstrap";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { Button, Form } from "react-bootstrap";
-import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function EditProduct() {
+  const { id } = useParams(); // Gets the ID from the URL
   const navigate = useNavigate();
-  const [productData, setProductData] = useState({});
-  const params = useParams();
-  console.log(params.id);
-  async function fetchProduct() {
-    // const product = await axios.get(`http://localhost:8000/${params.id}`);
-    const product = await axios.get(
-      `http://localhost:8000/products${params.id}`,
-    );
-    // const product = await axios.get(
-    //   `crud-server-production.up.railway.app/products${params.id}`,
-    // );
-    console.log(product.data);
-    setProductData(product.data);
-  }
+  const [loading, setLoading] = useState(false);
+  const [product, setProduct] = useState({
+    title: "",
+    desc: "",
+    price: "",
+    rating: "",
+    review: "",
+    image: "",
+  });
+
+  // 1. Fetch the existing data when the page loads
   useEffect(() => {
-    fetchProduct();
-  }, []);
+    async function getProduct() {
+      try {
+        const res = await axios.get(
+          `https://crud-server-yqbp.onrender.com/products/${id}`,
+        );
+        setProduct(res.data);
+      } catch (err) {
+        toast.error("Could not find this product!");
+      }
+    }
+    getProduct();
+  }, [id]);
 
   function changeHandler(e) {
     const { name, value } = e.target;
-    setProductData({ ...productData, [name]: value });
+    setProduct({ ...product, [name]: value });
   }
 
   async function submitHandler(e) {
     e.preventDefault();
+    setLoading(true);
 
-    const { title, desc, price, rating, review } = productData;
-    if (!title) return toast.error("Title is required!");
-    if (!desc) return toast.error("Description is required!");
-    if (!price) return toast.error("Price is required!");
-    if (!rating) return toast.error("Rating is required!");
-    if (!review) return toast.error("Review is required!");
+    // Use the ID directly from the product state to be safe
+    const targetId = product.id || product._id || id;
+
     try {
-      // await axios.patch(`http://localhost:8000/${params.id}`, productData);
-      await axios.patch(
-        `http://localhost:8000/products${params.id}`,
-        productData,
+      // We send the 'product' object to the server
+      await axios.put(
+        `https://crud-server-yqbp.onrender.com/products/${targetId}`,
+        product,
       );
-      toast.success("Product Updated successfully!");
+      toast.success("Product Updated Successfully!");
       navigate("/");
     } catch (error) {
-      toast.error("Failed to create product!");
-      console.error(error);
+      console.error("Update Error:", error.response); // This will show more detail in console
+      toast.error(
+        `Update failed: ${error.response?.statusText || "Server Error"}`,
+      );
+    } finally {
+      setLoading(false);
     }
   }
+
   return (
     <div className="w-50 mx-auto mt-4 my-4">
-      <h2 className="fst-italic">Edit Product</h2>
-      <Form onSubmit={submitHandler}>
-        <Form.Group className="mb-3">
-          <Form.Label className="fw-bold">Title</Form.Label>
-          <Form.Control
-            type="text"
-            name="title"
-            placeholder="Garments"
-            value={productData.title}
-            onChange={changeHandler}
-          />
-        </Form.Group>
+      <Card className="p-4 shadow-sm border-0" style={{ borderRadius: "15px" }}>
+        <h2 className="fst-italic mb-4 text-center">✏️ Edit Product</h2>
+        <Form onSubmit={submitHandler}>
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-bold">Title</Form.Label>
+            <Form.Control
+              name="title"
+              value={product.title}
+              onChange={changeHandler}
+              required
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label className="fw-bold">Description</Form.Label>
-          <Form.Control
-            type="text"
-            name="desc"
-            placeholder="Garments in Lahore"
-            value={productData.desc}
-            onChange={changeHandler}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-bold">Image URL</Form.Label>
+            <Form.Control
+              name="image"
+              placeholder="Paste new image address here..."
+              value={product.image}
+              onChange={changeHandler}
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label className="fw-bold">Price</Form.Label>
-          <Form.Control
-            type="number"
-            name="price"
-            placeholder="10"
-            value={productData.price}
-            onChange={changeHandler}
-          />
-        </Form.Group>
+          {/* PREVIEW TO HELP YOU FIX THE 'NO IMAGE' PROBLEM */}
+          {product.image && (
+            <div className="text-center mb-3">
+              <img
+                src={product.image}
+                alt="Preview"
+                style={{ maxHeight: "150px", borderRadius: "10px" }}
+                onError={(e) => {
+                  e.target.src = "https://placehold.co/400?text=Invalid+Link";
+                }}
+              />
+            </div>
+          )}
 
-        <Form.Group className="mb-3">
-          <Form.Label className="fw-bold">Rating</Form.Label>
-          <Form.Control
-            type="number"
-            name="rating"
-            placeholder="1-5"
-            value={productData.rating}
-            onChange={changeHandler}
-            min={1}
-            max={5}
-            // step={1}
-            // onChange={(e) => {
-            //   let value = Number(e.target.value);
-            //   if (value > 5) value = 5;
-            //   if (value < 1) value = 1;
-            //   setProducts({ ...products, rating: value });
-            // }}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label className="fw-bold">Reviews</Form.Label>
-          <Form.Control
-            type="text"
-            name="review"
-            placeholder="Satisfied"
-            value={productData.review}
-            onChange={changeHandler}
-          />
-        </Form.Group>
-
-        <Button type="submit" variant="success">
-          Edit
-        </Button>
-      </Form>
+          <div className="d-grid">
+            <Button
+              type="submit"
+              variant="success"
+              size="lg"
+              className="rounded-pill"
+              disabled={loading}
+            >
+              {loading ? (
+                <Spinner animation="border" size="sm" />
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </div>
+        </Form>
+      </Card>
     </div>
   );
 }
